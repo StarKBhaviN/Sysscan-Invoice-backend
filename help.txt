@@ -1,0 +1,35 @@
+Divide the app in modules(model)
+Module contains
+    1. Controller
+    2. Service
+    3. Provider
+    4. Pipes / Filters
+
+for generation of module... USE : nest g module <module_name>
+for generation of controller... USE : nest g module <controller_name>
+
+in <module_name>.controller.ts file you will define the routes for Get, post, put, del etc...
+
+create dto in which we will do validations
+
+install class validators for validating fields : npm i --save class-validator class-transformer
+
+set glohbal pipe in main.ts, By using below
+  - app.useGlobalPipes(new ValidationPipe());
+
+now it will get all the properties which you give in body like age is not there but can take in body and show in result, So in main.ts do this
+  - app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+
+Create service : nest g service <service_name> : used to create methods
+
+setup for prisma and prisma.service.ts in src folder
+
+add service in users.module.ts
+
+do migration : npx prisma migrate dev --name init
