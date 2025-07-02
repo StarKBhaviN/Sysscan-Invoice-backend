@@ -12,8 +12,10 @@ import { jwtConstants } from './constants';
 export class AuthGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    console.log('Auth Guard running');
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
+    console.log('Auth Guard : Token Received', token);
     if (!token) {
       throw new UnauthorizedException();
     }

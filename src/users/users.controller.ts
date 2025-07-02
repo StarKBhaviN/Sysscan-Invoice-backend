@@ -6,6 +6,9 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
+import { Roles } from 'src/roles/role.decorator';
+import { Role } from 'src/roles/roles.enum';
+import { RolesGuard } from 'src/roles/roles.guard';
 import { AuthGuard } from './auth.guard';
 import { createUserDTO } from './create-user-dto';
 import { LoginDTO } from './login-dto';
@@ -32,9 +35,9 @@ export class UsersController {
     return await this.userService.login(loginDTO); // This will be the response
   }
 
-  @UseGuards(AuthGuard)
-  //   @Roles('admin')
+  @UseGuards(AuthGuard, RolesGuard)
   @Get('/profile')
+  @Roles(Role.User)
   async getProfile(@Request() req) {
     return req.user;
   }
