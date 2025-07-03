@@ -37,7 +37,7 @@ export class UsersController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Get('/profile')
-  @Roles(Role.User)
+  @Roles(Role.Admin)
   async getProfile(@Request() req) {
     return req.user;
   }
