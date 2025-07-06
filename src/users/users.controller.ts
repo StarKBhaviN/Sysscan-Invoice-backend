@@ -10,8 +10,8 @@ import { Roles } from 'src/roles/role.decorator';
 import { Role } from 'src/roles/roles.enum';
 import { RolesGuard } from 'src/roles/roles.guard';
 import { AuthGuard } from './auth.guard';
-import { createUserDTO } from './create-user-dto';
-import { LoginDTO } from './login-dto';
+import { createUserDTO } from './dtos/create-user-dto';
+import { LoginDTO } from './dtos/login-dto';
 import { UsersService } from './users.service';
 
 @Controller('users') // Base url it can be anything use it before the route : users/signup
@@ -37,7 +37,7 @@ export class UsersController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Get('/profile')
-  @Roles(Role.Admin)
+  @Roles(Role.User)
   async getProfile(@Request() req) {
     return req.user;
   }

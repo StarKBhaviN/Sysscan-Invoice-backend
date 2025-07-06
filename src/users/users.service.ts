@@ -6,8 +6,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma.service';
-import { createUserDTO } from './create-user-dto';
-import { LoginDTO } from './login-dto';
+import { createUserDTO } from './dtos/create-user-dto';
+import { LoginDTO } from './dtos/login-dto';
 import { SignUpResponse } from './User';
 
 @Injectable()
@@ -77,6 +77,33 @@ export class UsersService {
     );
 
     return { accessToken };
+  }
+
+  async getAllUsers() {
+    return this.prisma.user.findMany({
+      include: {
+        Subscription: true,
+        Company: true,
+        Payment: true,
+      },
+    });
+  }
+
+  async getUserById(id: number) {
+    return this.prisma.user.findUnique({
+      where: { id },
+      include: {
+        Subscription: true,
+        Company: true,
+        Payment: true,
+      },
+    });
+  }
+
+  async deleteUser(id: number) {
+    return this.prisma.user.delete({
+      where: { id },
+    });
   }
 
   async encryptPassword(plainText: string, saltRound: number) {

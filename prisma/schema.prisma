@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,19 +7,60 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  role         Role          @default(USER)
+  adminRefID   Int?
+  phoneNumber  String?
+  profileImage String?
+  username     String
+  Company      Company[]
+  Payment      Payment[]
+  Subscription Subscription?
+  admin        User?         @relation("AdminToUsers", fields: [adminRefID], references: [id])
+  subUsers     User[]        @relation("AdminToUsers")
+}
+
+model Subscription {
+  id            Int       @id @default(autoincrement())
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean
+  paymentMethod String
+  userID        Int       @unique
+  Payment       Payment[]
+  user          User      @relation(fields: [userID], references: [id])
+}
+
+model Payment {
+  id             Int          @id @default(autoincrement())
+  amount         Float
+  status         String
+  date           DateTime     @default(now())
+  subscriptionID Int
+  userID         Int
+  subscription   Subscription @relation(fields: [subscriptionID], references: [id])
+  user           User         @relation(fields: [userID], references: [id])
+}
+
+model Company {
+  id          Int      @id @default(autoincrement())
+  name        String
+  address     String
+  createdAt   DateTime @default(now())
+  userID      Int
+  invoices    Json?
+  sales       Json?
+  purchases   Json?
+  receivables Json?
+  payables    Json?
+  user        User     @relation(fields: [userID], references: [id])
+}
+
 enum Role {
   USER
   ADMIN
-}
-
-// Schema define : By using this prisma it will convert below schema to table of SQL
-model User {
-  id        Int      @id @default(autoincrement())
-  firstName String?
-  lastName  String?
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  blocked   Boolean?
-  role      Role     @default(USER)
 }
