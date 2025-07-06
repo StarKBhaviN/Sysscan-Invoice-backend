@@ -33,3 +33,19 @@ setup for prisma and prisma.service.ts in src folder
 add service in users.module.ts
 
 do migration : npx prisma migrate dev --name init
+
+
+All Routes : 
+
+POST  /users/signup → Create user
+POST  /users/login → Login and get JWT
+GET   /users/profile → Get user profile (requires Bearer token)
+
+POST  /subscriptions → Create subscription
+GET   /subscriptions/:userID → Get subscription by user
+
+POST  /payments → Add payment
+GET   /payments/:userID → Get payment list by user
+
+POST  /companies → Add company
+GET   /companies/:userID → Get companies by user
