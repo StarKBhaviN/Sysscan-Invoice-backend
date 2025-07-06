@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -52,7 +53,7 @@ export class UsersService {
     });
     // If there is no user then unautorized
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid Creds');
     }
     // Decrypt user password and match with provided body password with decrypted pass
     const isMatched = await this.decryptPassword(
@@ -104,6 +105,19 @@ export class UsersService {
     return this.prisma.user.delete({
       where: { id },
     });
+  }
+
+  async getUserProfile(userId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const { password, ...safeUser } = user;
+    return safeUser;
   }
 
   async encryptPassword(plainText: string, saltRound: number) {

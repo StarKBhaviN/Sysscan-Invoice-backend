@@ -16,6 +16,7 @@ import { UsersService } from './users.service';
 
 @Controller('users') // Base url it can be anything use it before the route : users/signup
 export class UsersController {
+  prisma: any;
   constructor(private userService: UsersService) {}
   @Post('/signup')
   async create(
@@ -39,6 +40,10 @@ export class UsersController {
   @Get('/profile')
   @Roles(Role.User)
   async getProfile(@Request() req) {
-    return req.user;
+    const userId = req.user.id;
+
+    const user = await this.userService.getUserProfile(userId);
+
+    return user;
   }
 }
