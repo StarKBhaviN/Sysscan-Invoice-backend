@@ -23,7 +23,14 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This backend provides:
+
+- User & Role management: OWNER, ADMIN, USER; JWT auth; role guards
+- Admin can add up to 4 users per active subscription; admin CRUD on users
+- Photo upload for user profiles
+- Mock payment flow to activate subscriptions; swap provider URL later
+- Per-user SQLite company data sync and local read preference
+- Pairing system between .NET desktop app and mobile app via short-lived codes
 
 ## Project setup
 

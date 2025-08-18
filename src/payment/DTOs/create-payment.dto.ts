@@ -1,4 +1,10 @@
-import { IsDateString, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreatePaymentDTO {
   @IsNumber()
@@ -20,4 +26,8 @@ export class CreatePaymentDTO {
   @IsNumber()
   @IsNotEmpty()
   userID: number;
+
+  @IsOptional()
+  @IsString()
+  provider?: string;
 }

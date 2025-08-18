@@ -17,11 +17,14 @@ model User {
   phoneNumber  String?
   profileImage String?
   username     String
+  blocked      Boolean       @default(false)
   Company      Company[]
   Payment      Payment[]
   Subscription Subscription?
   admin        User?         @relation("AdminToUsers", fields: [adminRefID], references: [id])
   subUsers     User[]        @relation("AdminToUsers")
+  Pairings     Pairing[]
+  SqliteFiles  SqliteFile[]
 }
 
 model Subscription {
@@ -63,4 +66,30 @@ model Company {
 enum Role {
   USER
   ADMIN
+  OWNER
+}
+
+model Pairing {
+  id              Int       @id @default(autoincrement())
+  userID          Int
+  desktopClientId String?
+  code            String    @unique
+  expiresAt       DateTime
+  isActive        Boolean   @default(false)
+  lastSyncedAt    DateTime?
+  createdAt       DateTime  @default(now())
+  user            User      @relation(fields: [userID], references: [id])
+}
+
+model SqliteFile {
+  id              Int       @id @default(autoincrement())
+  userID          Int       @unique
+  storageProvider String
+  remoteUrl       String
+  localPath       String?
+  checksum        String?
+  lastSyncedAt    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  user            User      @relation(fields: [userID], references: [id])
 }

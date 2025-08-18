@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthGuard } from 'src/users/auth.guard';
 import { CreatePaymentDTO } from './DTOs/create-payment.dto';
 import { PaymentService } from './payment.service';
 
@@ -19,5 +28,28 @@ export class PaymentController {
   @Post()
   create(@Body() dto: CreatePaymentDTO) {
     return this.service.create(dto);
+  }
+
+  // Mock checkout session creator - authenticated admin
+  @UseGuards(AuthGuard)
+  @Post('checkout')
+  createCheckout(
+    @Req() req,
+    @Body() body: { amount: number; provider?: string },
+  ) {
+    const userId = req.user.id;
+    return this.service.createMockCheckout(userId, body.amount, body.provider);
+  }
+
+  // Mock webhook to activate subscription
+  @Post('webhook')
+  webhook(
+    @Body()
+    body: {
+      event: string;
+      data: { userId: number; amount: number; status: string };
+    },
+  ) {
+    return this.service.handleMockWebhook(body);
   }
 }

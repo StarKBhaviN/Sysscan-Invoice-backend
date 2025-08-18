@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { AuthGuard } from 'src/users/auth.guard';
 import { CompanyService } from './company.service';
 import { CreateCompanyDTO } from './DTOs/create-company.dto';
 
@@ -11,9 +12,10 @@ export class CompanyController {
     return this.service.getAll();
   }
 
-  @Get(':userID')
-  getByUser(@Param('userID') userID: string) {
-    return this.service.getByUser(+userID);
+  @UseGuards(AuthGuard)
+  @Get('me')
+  getMyCompanies(@Req() req) {
+    return this.service.getByUser(req.user.id);
   }
 
   @Post()

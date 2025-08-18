@@ -7,6 +7,8 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma.service';
+import { Role } from 'src/roles/roles.enum';
+import { AdminCreateUserDTO } from './dtos/admin-create-user.dto';
 import { createUserDTO } from './dtos/create-user-dto';
 import { LoginDTO } from './dtos/login-dto';
 import { SignUpResponse } from './User';
@@ -36,11 +38,16 @@ export class UsersService {
 
     // Save the user in DB : Use prisma methods refer doc : without return it will show error
     return this.prisma.user.create({
-      data: payload,
-      select: {
-        email: true,
-        id: true,
+      data: {
+        email: payload.email,
+        password: payload.password,
+        username: payload.username,
+        profileImage: payload.profileImage,
+        phoneNumber: payload.phoneNumber,
+        adminRefID: payload.adminRefID ?? undefined,
+        role: (payload.role as any) ?? 'USER',
       },
+      select: { email: true, id: true },
     });
   }
 
@@ -80,6 +87,24 @@ export class UsersService {
     return { accessToken };
   }
 
+  async issueFreshToken(userId: number): Promise<{ accessToken: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const accessToken = await this.jwtService.signAsync(
+      {
+        email: user.email,
+        id: user.id,
+        role: user.role,
+      },
+      {
+        expiresIn: '1d',
+      },
+    );
+    return { accessToken };
+  }
+
   async getAllUsers() {
     return this.prisma.user.findMany({
       include: {
@@ -105,6 +130,76 @@ export class UsersService {
     return this.prisma.user.delete({
       where: { id },
     });
+  }
+
+  async getSubUsersForAdmin(adminId: number) {
+    return this.prisma.user.findMany({
+      where: { adminRefID: adminId },
+    });
+  }
+
+  async addSubUserForAdmin(adminId: number, dto: AdminCreateUserDTO) {
+    const admin = await this.prisma.user.findUnique({
+      where: { id: adminId },
+      include: { Subscription: true },
+    });
+    if (!admin) {
+      throw new NotFoundException('Admin not found');
+    }
+    if (![Role.Admin, Role.Owner].includes(admin.role as unknown as Role)) {
+      throw new UnauthorizedException('Only admins can add users');
+    }
+    const activeSubscription = await this.prisma.subscription.findUnique({
+      where: { userID: adminId },
+    });
+    if (!activeSubscription || !activeSubscription.isActive) {
+      throw new UnauthorizedException(
+        'Active subscription required to add users',
+      );
+    }
+    const count = await this.prisma.user.count({
+      where: { adminRefID: adminId },
+    });
+    if (count >= 4) {
+      throw new BadRequestException('User limit reached (max 4)');
+    }
+    const emailExists = await this.prisma.user.findFirst({
+      where: { email: dto.email },
+    });
+    if (emailExists) {
+      throw new BadRequestException('Email already registered');
+    }
+    const passwordHash = await this.encryptPassword(dto.password, 10);
+    return this.prisma.user.create({
+      data: {
+        email: dto.email,
+        username: dto.username,
+        password: passwordHash,
+        phoneNumber: dto.phoneNumber,
+        role: 'USER',
+        adminRefID: adminId,
+      },
+      select: { id: true, email: true, username: true, adminRefID: true },
+    });
+  }
+
+  async deleteSubUserForAdmin(adminId: number, userId: number) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || user.adminRefID !== adminId) {
+      throw new NotFoundException('User not found');
+    }
+    if (user.role !== 'USER') {
+      throw new BadRequestException('Cannot delete admin or owner accounts');
+    }
+    return this.prisma.user.delete({ where: { id: userId } });
+  }
+
+  async uploadUserPhoto(userId: number, photoPath: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { profileImage: photoPath },
+    });
+    return { message: 'Photo uploaded', path: photoPath };
   }
 
   async getUserProfile(userId: number) {
