@@ -30,4 +30,8 @@ export class CreatePaymentDTO {
   @IsOptional()
   @IsString()
   provider?: string;
+
+  @IsOptional()
+  @IsString()
+  orderID?: string;
 }

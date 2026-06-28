@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from 'src/users/auth.guard';
 import { PairingService } from './pairing.service';
 
@@ -15,6 +23,11 @@ export class PairingController {
   @Post('activate')
   activate(@Body() body: { code: string; desktopClientId: string }) {
     return this.service.activatePairing(body.code, body.desktopClientId);
+  }
+
+  @Get('status/:code')
+  async getStatus(@Param('code') code: string) {
+    return this.service.getPairingStatus(code);
   }
 
   @UseGuards(AuthGuard)

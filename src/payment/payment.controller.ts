@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -20,8 +21,10 @@ export class PaymentController {
     return this.service.getAll();
   }
 
-  @Get(':userID')
+  @Get('by-user/:userID')
   getByUser(@Param('userID') userID: string) {
+    console.log('getByUser called with userID:', userID);
+
     return this.service.getByUser(+userID);
   }
 
@@ -41,15 +44,26 @@ export class PaymentController {
     return this.service.createMockCheckout(userId, body.amount, body.provider);
   }
 
-  // Mock webhook to activate subscription
   @Post('webhook')
-  webhook(
-    @Body()
-    body: {
-      event: string;
-      data: { userId: number; amount: number; status: string };
-    },
-  ) {
-    return this.service.handleMockWebhook(body);
+  webhook(@Body() body: any) {
+    return this.service.handleCashfreeWebhook(body);
   }
+
+  @Get('status')
+  async getStatus(@Query('order_id') orderID: string) {
+    const payment = await this.service.getByOrderId(orderID);
+    if (!payment) return { status: 'pending' };
+    return { status: payment.status };
+  }
+  // Mock webhook to activate subscription
+  // @Post('webhook')
+  // webhook(
+  //   @Body()
+  //   body: {
+  //     event: string;
+  //     data: { userId: number; amount: number; status: string };
+  //   },
+  // ) {
+  //   return this.service.handleMockWebhook(body);
+  // }
 }

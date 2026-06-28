@@ -39,14 +39,15 @@ model Subscription {
 }
 
 model Payment {
-  id             Int          @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   amount         Float
   status         String
-  date           DateTime     @default(now())
-  subscriptionID Int
+  date           DateTime      @default(now())
+  subscriptionID Int?
   userID         Int
-  subscription   Subscription @relation(fields: [subscriptionID], references: [id])
-  user           User         @relation(fields: [userID], references: [id])
+  orderID        String        @unique
+  subscription   Subscription? @relation(fields: [subscriptionID], references: [id])
+  user           User          @relation(fields: [userID], references: [id])
 }
 
 model Company {

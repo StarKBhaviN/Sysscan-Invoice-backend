@@ -368,7 +368,7 @@ Create a short-lived pairing code for the authenticated user. Share this code wi
 
 ```bash
 curl -X POST http://localhost:3000/pairing/create \
-  -H "Authorization: Bearer <JWT>"
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFsaWNlQGV4YW1wbGUuY29tIiwiaWQiOjMxLCJyb2xlIjoiVVNFUiIsImlhdCI6MTc1NzI1MTI5MCwiZXhwIjoxNzU3MzM3NjkwfQ.QlYqzTn-hdix6TbDZIfdfYqicFINSBi4P_Eqb5jQ5yI"
 ```
 
 ### POST /pairing/activate
